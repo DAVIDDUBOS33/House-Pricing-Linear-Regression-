@@ -91,7 +91,7 @@ Cependant, il y a tout de même une certaine homoscédascité puisque, malgré q
 
 Notre modèle de régression linéaire ne va donc pas être parfait mais il va pouvoir déjà nous donner une bonne vision d'ensemble et des prédictions qui ne seront pas si éloignées que ca de la réalité.
 
-En ce qui concerne la non-colinéarité, si nous regardons certaines variables, on peut dire qu'il y a une colinéarité forte. En effet, nous une variable OverallCond qui correspond à la qualité générale de la maison et une variable OverallQual qui correspond à la qualité des matériaux utilisés pour construire la maison. On peut tout à fait se dire que si la qualité générale de la maison est bonne, les materiaux vont encore être de bonne qualité.
+En ce qui concerne la non-colinéarité, si nous regardons certaines variables, on peut dire qu'il y a une colinéarité forte. En effet, nous avons une variable OverallCond qui correspond à la qualité générale de la maison et une variable OverallQual qui correspond à la qualité des matériaux utilisés pour construire la maison. On peut tout à fait se dire que si la qualité générale de la maison est bonne, les materiaux vont encore être de bonne qualité.
 
 De la même manière, en explorant le dataset, vous verrez qu'il y a d'autres variables qui très certainement extrêmement colinéaire.
 

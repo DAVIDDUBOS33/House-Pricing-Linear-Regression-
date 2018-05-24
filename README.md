@@ -264,7 +264,7 @@ Il est toujours possible d'améliorer un modèle. Voici quelques idées qui pour
 * Améliorer la façon dont nous avons traité les valeurs manquantes
 
 Dans le premier cas, il se peut en effet qu'enlever des variables qui ont une forte co-linéarité rende le modèle plus performant. Vous aurez aussi moins de variables à étudier donc le modèle sera plus facile à traiter.
-Dans le second cas, nous aurions simplement dû appliquer LabelEncoder() sur nos variables ordinales de manière à garder l'influence de l'ordre des catégories dans notre modèle.
+Dans le second cas, nous avons simplement appliqué LabelEncoder() sur nos variables nominales et ordinales mais nous aurions les séparer et appliquer OneHotEncoder sur nos variables nominales.
 
 Enfin nous avons remplacé toutes les valeurs manquantes dans les variables numériques par la médiane. Cependant, la colonne GarageYrBlt correspond à l'année où le garage a été construit. Or, nous savons que dans certaines maisons, il n'y a pas eu de garage construit. Au lieu de remplacer donc les dates manquantes par la médiane, peut être serait-il judicieux de remplacer par une autre valeur comme 9999 ou une année future dans le temps.
 

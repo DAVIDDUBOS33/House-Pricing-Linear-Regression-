@@ -120,6 +120,22 @@ isnan(dataset, 81)
 
 Ca nous fait un bon paquet de colonnes à s'occuper ! Voyons comment on peut procéder
 
+### Remplacer les valeurs manquantes dans les variables texte
+
+Avant de séparer notre dataset en training set et un test set, on remarque que l'on a des valeurs manquantes dans les colonnes de texte. Dans chaque colonne où l'on remarque des NaN, cela veut simplement dire que l'objet en question n'est pas présent dans la maison.
+
+
+Par exemple, si l'on voit des NaN dans les colonnes qui correspondent au garage, c'est simplement parce qu'on a pas de garage dans la maison.
+
+Remplaçons donc directement ces valeurs par "None" dans notre dataset.
+
+```python
+for i in range(0, 81):
+    if type(dataset.iloc[0, i]) == str or np.isnan(dataset.iloc[0,i]):
+        if dataset.iloc[:,i].isnull().any() == True:
+            dataset.iloc[:, i] = dataset.iloc[:, i].replace(np.nan, "None", regex = True)
+```
+
 ### Séparation des variables indépendantes de la variable dépendantes
 
 Commençons tout d'abord par séparer nos variables dépendantes de notre variable indépendante. Il sera plus simple de s'y retrouver ensuite
@@ -140,55 +156,51 @@ Nous allons remplacer les valeurs manquantes par la valeur médiane pour ne pas 
 ```python
 from sklearn.preprocessing import Imputer
 imputer = Imputer(missing_values="NaN", strategy = "median", axis = 0)
-imputer.fit(X[:, [2, 25, 58]])
-X[:,[2, 25, 58]] = imputer.transform(X[:, [2, 25, 58]])
+
+k = []
+for i in range(0, 79):
+    if type(X[:,i].any()) == int or type(X[:,i].any()) == float:
+        if X[:,i].sum() != X[:,i].sum():
+            k += [i]
+imputer.fit(X[:, k])
+X[:,k] = imputer.transform(X[:, k])
 ```
 
-### Remplacer les valeurs manquantes dans les variables texte
+Expliquons un petit peu ces lignes de codes qui peuvent faire peur à première vue. Nous avons utiliser la classe Imputer pour convertir nos données manquantes en la médiane de notre colonne.
 
-Dernière étape est de remplacer les valeurs manquantes dans les colonnes textes. Cette étape sera très simple. Il suffit de transformer notre X en un DataFrame via Panda puis utiliser la fonction `fillna()` pour remplacer les NaN par une valeur texte.
+Ensuite nous avons créé une boucle qui reconnait le type de données qu'il y a dans chaque colonne. Puisque nous voulons convertir uniquement les données chiffrées, nous avons créé une condition qui reconnait les colonnes de type integer ou float.
 
-Lorsque nous regardons ce à quoi correspond les NaN dans les colonnes texte, elles caractérisent l'absence de la catégorie dans la propriété. Par exemple, les NaN dans la colonne GarageFinish correspond au fait qu'il n'y a pas de garage dans la maison.
+Ensuite, dans Python, lorsqu'une colonne contient des valeurs manquantes, n'importe quelle opération que vous faites donnera un NaN. C'est ainsi que l'on peut reconnaître si nous avons une valeur manquante dans une des colonnes. En faisant une somme sur les colonnes, si on obtient un NaN, c'est qu'il y a au moins 1 NaN dans la colonne. Enfin nan != nan est toujours vrai ! C'est pourquoi on peut le faire dans la ligne du dessus.
 
-Dès lors, nous allons simplement remplacer les valeurs manquantes par : `None` et le tour est joué.
+On stocke enfin les valeurs i pour lesquelles on a bien un NaN dans une variable k pour qu'on puisse ensuite la réutiliser dans l'imputer sans que l'on ait eu à insérer chacune des colonnes à la main.
 
 
-```python
-X = pd.DataFrame(X)
-X = X.fillna("None")
-X.head()
-```
 ### Encoder les variables catégoriques
 
 Dernière étape avant de finir notre phase de preprocessing est d'encoder nos variables catégoriques.
 
 Nous rencontrons ici un second problème. Notre matrice X est composée de variables catégoriques nominales et ordinales. Techniquement, nous devrions simplement encoder les variables ordinales en chiffres et ne pas les traiter comme des variables factices de façon à respecter "l'ordre" des catégories.
 
-Cependant, nous avons 43 variables textes dont 21 qui sont ordinales et 22 qui ne sont nominales. Deux options s'offrent encore à nous :
+Cependant, nous avons 43 variables textes dont certaines sont nominales et d'autres sont ordinales. Trois options s'offrent encore à nous :
 
-1. Encoder les variables ordinales à la main puis les variables nominales automatiquement
-2. Traiter toutes les variables comme des variables nominales et les encoder rapidement avec quelques lignes de code
+1. Séparer à la main les variables nominales et les variables ordinales puis les encoder séparemment.
+2. Traiter toutes les variables comme des variables nominales et les encoder rapidement.
+3. Traiter toutes les variables comme des variables ordinales et les encoder rapidement
 
 
-Par soucis de rapidité, nous choisirons l'option 2. Certes, elle ne sera pas aussi précise que l'option 1 et nous allons nous retrouver avec une nouvelle matrice X composée de beaucoup plus de colonnes. Mais puisque nous avons décidé auparavant que nous ne chercheront pas à optimiser notre modèle, nous n'effectueront pas de backward elimination pour traiter chacune de nos variables.
-De plus la qualité prédictive de notre modèle n'en sera pas trop amoindrie si nous encodons nos variables ordinales comme des variables nominales.
+La meilleure façon de procéder aurait été de choisir l'option 1. Cependant, par contrainte de temps, nous choix se portera entre l'option 2 et 3.
+
+Il reste un problème avec l'option 2 qui est le suivant. Notre modèle pourra tourner si nous avons un test set qui est exactement de la même taille que le training set. Or, il est tout à fait possible que nous rencontrions un test set qui ne comporte pas forcément toutes les catégories présentes dans notre training set. Lorsque nous allons utiliser OneHotEncoder sur un nouveau test set, il est probable que l'on n'obtienne pas le même nombre de colonnes que ce que nous aurions eu lorsque nous avons entrainé notre modèle.
+
+C'est pour cette raison que nous choisirons l'option 3. Nous garderons tout de même en tête que nous pourrions améliorer notre modèle en choisissant l'option 1.
 
 ```python
-X = X.values
-
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+from sklearn.preprocessing import LabelEncoder
 labelencoder = LabelEncoder()
-k = []
 for i in range(0,79):
     if type(X[0,i]) == str:        
         X[:,i] = labelencoder.fit_transform(X[:,i])
-        k +=[i]
-
-onehotencoder = OneHotEncoder(categorical_features = [k])    
-X = onehotencoder.fit_transform(X).toarray()
 ```
-
-NB : N'oublions pas de reconvertir X en une array (X = X.values) sinon le code du dessous ne fonctionnera pas.
 
 ### Application de notre modèle de régression linéaire
 

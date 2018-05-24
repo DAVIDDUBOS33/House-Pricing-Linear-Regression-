@@ -3,3 +3,5 @@ sample_submission.csv
 sample_submission.csv.gz
 submissions_final.csv
 .ipynb_checkpoints
+.gitignore
+House Pricing Linear Regression Model - OneHotEncoded.ipynb
